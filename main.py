@@ -61,6 +61,19 @@ class Host:
             ],
         }
 
+PORT_SERVICE_MAP = {
+    22: "ssh",
+    21: "ftp",
+    23: "telnet",
+    25: "smtp",
+    80: "http",
+    443: "https",
+    139: "smb",
+    445: "smb",
+    3306: "mysql",
+    3389: "rdp",
+}
+
 
 # -----------------------------
 # ScanCannon parsing helpers
@@ -202,6 +215,14 @@ def load_scancannon_results(results_root: Path) -> List[Host]:
                 host = hosts.setdefault(ip, Host(ip=ip))
                 for port in ports:
                     host.add_service(Service(name=service_name, port=port))
+        # After merging all ScanCannon output, assign services based on port number
+    for host in hosts.values():
+        for port in host.ports:
+            if port not in host.services:
+                if port in PORT_SERVICE_MAP:
+                    service_name = PORT_SERVICE_MAP[port]
+                    host.add_service(Service(name=service_name, port=port))
+
 
     return list(hosts.values())
 
