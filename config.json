@@ -31,13 +31,13 @@
 
   "tools": {
     "hydra_ssh": {
-      "cmd": "hydra -L /usr/share/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/seclists/Passwords/Common-Credentials/top-1000-passwords.txt -o results/{ip}_ssh_hydra.txt ssh://{ip}:{port}"
+      "cmd": "hydra -L /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt -P /usr/share/wordlists/seclists/Passwords/Common-Credentials/top-passwords-shortlist.txt -o results/{ip}_ssh_hydra.txt ssh://{ip}:{port}"
     },
     "hydra_ftp": {
-      "cmd": "hydra -L /usr/share/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/seclists/Passwords/Common-Credentials/top-1000-passwords.txt -o results/{ip}_ftp_hydra.txt ftp://{ip}:{port}"
+      "cmd": "hydra -L /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt -P /usr/share/wordlists/seclists/Passwords/Common-Credentials/top-passwords-shortlist.txt -o results/{ip}_ftp_hydra.txt ftp://{ip}:{port}"
     },
     "msf_ssh_login": {
-      "cmd": "msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_login; set RHOSTS {ip}; set RPORT {port}; set USER_FILE /usr/share/seclists/Usernames/top-usernames-shortlist.txt; set PASS_FILE /usr/share/seclists/Passwords/Common-Credentials/top-1000-passwords.txt; run; exit\""
+      "cmd": "msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_login; set RHOSTS {ip}; set RPORT {port}; set USER_FILE /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt; set PASS_FILE /usr/share/wordlists/seclists/Passwords/Common-Credentials/top-passwords-shortlist.txt; run; exit\""
     },
     "nikto_http": {
       "cmd": "nikto -host http://{ip}:{port} -output results/{ip}_{port}_nikto.txt"
