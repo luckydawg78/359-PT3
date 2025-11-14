@@ -285,18 +285,17 @@ def plan_actions_for_host(host: Host, service_config: dict) -> Dict[str, List[Se
 
 
 
+import subprocess
+
 def execute_plan_for_host(
     host: Host,
     plan: Dict[str, List[Service]],
     service_config: dict,
 ) -> None:
-    """
-    Placeholder for your automated workflow.
 
-    Uses the config to show which tools are associated with each service/action.
-    """
+    tools_cfg = service_config.get("tools", {})
     services_cfg = service_config.get("services", {})
-    defaults_cfg = service_config.get("defaults", {"actions": ["other"], "tools": []})
+    defaults_cfg = service_config.get("defaults", {})
 
     print(f"\n[+] Host {host.ip}")
     print(f"    Ports: {sorted(host.ports)}")
@@ -307,14 +306,40 @@ def execute_plan_for_host(
 
     for action_type, services in plan.items():
         print(f"    Action: {action_type}")
+
         for svc in services:
             svc_cfg = services_cfg.get(svc.name, defaults_cfg)
             tool_ids = svc_cfg.get("tools", [])
 
-            if tool_ids:
-                print(f"      -> would process {svc} using tools: {', '.join(tool_ids)}")
-            else:
-                print(f"      -> would process {svc} (no tools configured)")
+            if not tool_ids:
+                print(f"      -> No tools configured for {svc}")
+                continue
+
+            for tool_id in tool_ids:
+                tool_info = tools_cfg.get(tool_id)
+                if not tool_info:
+                    print(f"      -> Unknown tool ID: {tool_id}")
+                    continue
+
+                cmd_template = tool_info.get("cmd")
+                if not cmd_template:
+                    print(f"      -> Tool {tool_id} missing 'cmd' field")
+                    continue
+
+                # Fill IP + port
+                cmd = cmd_template.format(
+                    ip=host.ip,
+                    port=svc.port,
+                    service=svc.name
+                )
+
+                print(f"      -> Running: {cmd}")
+
+                # Actually execute the command (safe in your lab)
+                try:
+                    subprocess.run(cmd, shell=True, check=False)
+                except Exception as e:
+                    print(f"      -> Error running {tool_id}: {e}")
 
 
 # -----------------------------

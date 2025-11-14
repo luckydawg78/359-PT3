@@ -28,6 +28,31 @@
       ]
     }
   },
+
+  "tools": {
+    "hydra_ssh": {
+      "cmd": "hydra -L /usr/share/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/seclists/Passwords/Common-Credentials/top-1000-passwords.txt -o results/{ip}_ssh_hydra.txt ssh://{ip}:{port}"
+    },
+    "hydra_ftp": {
+      "cmd": "hydra -L /usr/share/seclists/Usernames/top-usernames-shortlist.txt -P /usr/share/seclists/Passwords/Common-Credentials/top-1000-passwords.txt -o results/{ip}_ftp_hydra.txt ftp://{ip}:{port}"
+    },
+    "msf_ssh_login": {
+      "cmd": "msfconsole -q -x \"use auxiliary/scanner/ssh/ssh_login; set RHOSTS {ip}; set RPORT {port}; set USER_FILE /usr/share/seclists/Usernames/top-usernames-shortlist.txt; set PASS_FILE /usr/share/seclists/Passwords/Common-Credentials/top-1000-passwords.txt; run; exit\""
+    },
+    "nikto_http": {
+      "cmd": "nikto -host http://{ip}:{port} -output results/{ip}_{port}_nikto.txt"
+    },
+    "nikto_https": {
+      "cmd": "nikto -host https://{ip}:{port} -ssl -output results/{ip}_{port}_nikto.txt"
+    },
+    "whatweb_fingerprint": {
+      "cmd": "whatweb http://{ip}:{port} --log-brief=results/{ip}_{port}_whatweb.txt"
+    },
+    "sslscan": {
+      "cmd": "sslscan --no-colour --xml=results/{ip}_{port}_sslscan.xml {ip}:{port}"
+    }
+  },
+
   "defaults": {
     "actions": ["other"],
     "tools": []
