@@ -1,16 +1,4 @@
 #!/usr/bin/env python3
-"""
-IT 359 – Automated Red Team Workflow (Starter Code)
-
-This script:
-  1. Parses ScanCannon results
-  2. Builds a structured model of hosts + services
-  3. Provides hooks for automated follow-up actions
-
-IMPORTANT:
-  - Only use this in lab environments (e.g., your Proxmox range).
-  - Do NOT point this at networks you don't own / have explicit written permission to test.
-"""
 
 from __future__ import annotations
 
@@ -27,7 +15,6 @@ from typing import Dict, List, Set, Iterable
 
 @dataclass
 class Service:
-    """Represents a network service on a host."""
     name: str          # e.g., "ssh", "http", "ftp"
     port: int          # e.g., 22, 80
     protocol: str = "tcp"
@@ -38,7 +25,6 @@ class Service:
 
 @dataclass
 class Host:
-    """Represents a host discovered by ScanCannon."""
     ip: str
     ports: Set[int] = field(default_factory=set)
     services: Dict[int, Service] = field(default_factory=dict)
@@ -80,17 +66,6 @@ PORT_SERVICE_MAP = {
 # -----------------------------
 
 def parse_hosts_and_ports_file(path: Path) -> Dict[str, Set[int]]:
-    """
-    Parse hosts_and_ports.txt produced by ScanCannon.
-
-    Expected format (based on ScanCannon docs):
-        192.0.2.10:22
-        192.0.2.11:80
-        192.0.2.11:443
-
-    Returns:
-        dict[ip] -> set(ports)
-    """
     host_ports: Dict[str, Set[int]] = {}
     if not path.is_file():
         return host_ports
@@ -118,26 +93,7 @@ def parse_hosts_and_ports_file(path: Path) -> Dict[str, Set[int]]:
 
 
 def parse_interesting_servers_dir(path: Path) -> Dict[str, Dict[str, Set[int]]]:
-    """
-    Parse interesting_servers/ directory.
 
-    Example layout (from ScanCannon README):
-        results/
-          <cidr_dir>/
-            interesting_servers/
-              ssh_servers.txt
-              http_servers.txt
-              ftp_servers.txt
-              ...
-
-    Each file is assumed to contain lines like:
-        192.0.2.10:22
-        192.0.2.11:22
-
-    Returns:
-        dict[service_name] -> dict[ip] -> set(ports)
-           e.g. { "ssh": { "192.0.2.10": {22}, ... }, "http": {...} }
-    """
     service_map: Dict[str, Dict[str, Set[int]]] = {}
 
     if not path.is_dir():
@@ -172,23 +128,7 @@ def parse_interesting_servers_dir(path: Path) -> Dict[str, Dict[str, Set[int]]]:
 
 
 def load_scancannon_results(results_root: Path) -> List[Host]:
-    """
-    Walk the ScanCannon 'results/' directory and produce a list of Host objects.
 
-    Directory structure (from ScanCannon docs):
-        results/
-          203_0_113_0_24/
-            hosts_and_ports.txt
-            interesting_servers/
-              ssh_servers.txt
-              http_servers.txt
-              ...
-
-    We:
-      1. Parse hosts_and_ports.txt for each network
-      2. Parse interesting_servers/ to label services
-      3. Merge everything into Host objects
-    """
     if not results_root.is_dir():
         raise FileNotFoundError(f"Results directory not found: {results_root}")
 
@@ -257,19 +197,7 @@ def load_service_config(path: Path|None) -> dict:
 from collections import defaultdict
 
 def plan_actions_for_host(host: Host, service_config: dict) -> Dict[str, List[Service]]:
-    """
-    Decide what to do with each host based on its services and the config.
 
-    Config structure (example):
-      {
-        "services": {
-          "ssh":   {"actions": ["credential_testing"], "tools": [...]},
-          "http":  {"actions": ["web_followup"],       "tools": [...]},
-          ...
-        },
-        "defaults": {"actions": ["other"], "tools": []}
-      }
-    """
     services_cfg = service_config.get("services", {})
     defaults_cfg = service_config.get("defaults", {"actions": ["other"], "tools": []})
 
